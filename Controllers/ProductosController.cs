@@ -7,7 +7,7 @@ using WebAPIProducto.Models;
 namespace WebAPIProducto.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ProductosController : Controller
     {
         private readonly ILogger<ProductosController> _logger;  
@@ -26,6 +26,56 @@ namespace WebAPIProducto.Controllers
             return await _context.Productos.ToListAsync();
         }
 
-        
+        [HttpGet("{id}", Name ="GetProducto")]
+        public async Task<ActionResult<Producto>> GetProducto(int id)
+        {
+            var producto = await _context.Productos.FindAsync(id);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+            return producto;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Producto>> Post( Producto producto)
+        {
+            _context.Add(producto);
+            await _context.SaveChangesAsync();
+
+            var value = new { id = producto.Id };
+            return new CreatedAtRouteResult("GetProducto",new {id= producto.Id }, producto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Put(int id, Producto producto)
+        {
+            if (id != producto.Id )
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(producto).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Producto>> Delete(int id)
+        {
+            var producto = await _context.Productos.FindAsync(id); 
+            
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            _context.Remove(producto);
+            await _context.SaveChangesAsync();
+
+            return producto;
+        }
     }
 }
