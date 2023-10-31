@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPIProducto.Data;
+using WebAPIProducto.Dtos;
 using WebAPIProducto.Models;
 
 namespace WebAPIProducto.Controllers
@@ -39,24 +40,40 @@ namespace WebAPIProducto.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Producto>> Post( Producto producto)
+        public async Task<ActionResult<Producto>> Post(ProductoCreateDto productoDto)
         {
-            _context.Add(producto);
+            var productToCreate = new Producto();
+
+            productToCreate.Nombre = productoDto.Nombre;
+            productToCreate.Descripcion = productoDto.Descripcion;
+            productToCreate.Precio = productoDto.Precio;
+            productToCreate.FechaDeAlta = DateTime.Now;
+            productToCreate.Activo = true;
+            _context.Add(productToCreate);
             await _context.SaveChangesAsync();
 
-            var value = new { id = producto.Id };
-            return new CreatedAtRouteResult("GetProducto",new {id= producto.Id }, producto);
+            var value = new { id = productToCreate.Id };
+            return new CreatedAtRouteResult("GetProducto",new {id= productToCreate.Id }, productToCreate);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(int id, Producto producto)
+        public async Task<IActionResult> Put(int id, ProductoUpdateDto productoDto)
         {
-            if (id != producto.Id )
+            if (id != productoDto.Id )
+            {
+                return BadRequest("Los Ids no coinciden");
+            }
+
+            var productToUpdate = await _context.Productos.FindAsync(id);
+            if (productToUpdate == null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(producto).State = EntityState.Modified;
+            productToUpdate.Descripcion = productoDto.Descripcion;
+            productToUpdate.Precio = productoDto.Precio;
+
+            _context.Entry(productToUpdate).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return Ok();
