@@ -28,25 +28,31 @@ namespace WebAPIProducto.Controllers
         }
 
         [HttpGet("{id}", Name ="GetProducto")]
-        public async Task<ActionResult<Producto>> GetProducto(int id)
+        public async Task<ActionResult<ProductToListDto>> GetProducto(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
+            var productToList = new ProductToListDto();
 
             if (producto == null)
             {
                 return NotFound();
             }
-            return producto;
+
+            productToList.Id = producto.Id;
+            productToList.Nombre = producto.Nombre;
+            productToList.Descripcion = producto.Descripcion;
+
+            return productToList;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Producto>> Post(ProductoCreateDto productoDto)
+        public async Task<ActionResult<Producto>> Post(ProductCreateDto productDto)
         {
             var productToCreate = new Producto();
 
-            productToCreate.Nombre = productoDto.Nombre;
-            productToCreate.Descripcion = productoDto.Descripcion;
-            productToCreate.Precio = productoDto.Precio;
+            productToCreate.Nombre = productDto.Nombre;
+            productToCreate.Descripcion = productDto.Descripcion;
+            productToCreate.Precio = productDto.Precio;
             productToCreate.FechaDeAlta = DateTime.Now;
             productToCreate.Activo = true;
             _context.Add(productToCreate);
@@ -57,9 +63,9 @@ namespace WebAPIProducto.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, ProductoUpdateDto productoDto)
+        public async Task<IActionResult> Put(int id, ProductUpdateDto productDto)
         {
-            if (id != productoDto.Id )
+            if (id != productDto.Id )
             {
                 return BadRequest("Los Ids no coinciden");
             }
@@ -70,8 +76,8 @@ namespace WebAPIProducto.Controllers
                 return BadRequest();
             }
 
-            productToUpdate.Descripcion = productoDto.Descripcion;
-            productToUpdate.Precio = productoDto.Precio;
+            productToUpdate.Descripcion = productDto.Descripcion;
+            productToUpdate.Precio = productDto.Precio;
 
             _context.Entry(productToUpdate).State = EntityState.Modified;
             await _context.SaveChangesAsync();
