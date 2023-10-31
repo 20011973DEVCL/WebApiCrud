@@ -6,6 +6,7 @@ using WebAPIProducto.Models;
 
 namespace WebAPIProducto.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
     public class ProductosController : Controller
     {
@@ -25,15 +26,6 @@ namespace WebAPIProducto.Controllers
             return await _context.Productos.ToListAsync();
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View("Error!");
-        }
+        
     }
 }
